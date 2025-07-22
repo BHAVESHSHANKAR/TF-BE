@@ -6,22 +6,11 @@ dotenv.config();
 
 const app = express();
 
-// CORS configuration
-const allowedOrigins = [process.env.FRONTEND_URL, 'http://localhost:5173'];
-
+// CORS configuration - Allow all origins
 app.use(cors({
-  origin: function(origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  },
-  methods: ['POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type'],
+  origin: true, // Allow all origins
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: false
 }));
 
@@ -69,7 +58,7 @@ app.post('/send-contact', async (req, res) => {
 
     // Input validation
     if (!email || !clientName || !projectTitle || !description) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Missing required fields',
         details: 'Email, client name, project title, and description are required'
       });
@@ -78,7 +67,7 @@ app.post('/send-contact', async (req, res) => {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         error: 'Invalid email format',
         details: 'Please provide a valid email address'
       });
@@ -197,9 +186,9 @@ app.post('/send-contact', async (req, res) => {
           subject: `New Project Inquiry: ${projectTitle} - ${clientName}`,
           html: emailContent
         });
-        
+
         console.log(`Contact form email sent successfully from ${email}`);
-        return res.status(200).json({ 
+        return res.status(200).json({
           message: 'Your message has been sent successfully! We will get back to you soon.',
           status: 'success'
         });
@@ -218,7 +207,7 @@ app.post('/send-contact', async (req, res) => {
 
   } catch (error) {
     console.error('Server error:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Failed to send message',
       details: error.message || 'An unexpected error occurred'
     });
